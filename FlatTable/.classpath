@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
+	<classpathentry kind="lib" path="/local-scratch/SRiahi/workSpaceJan/FlatTable/mysql-connector-java-5.1.18-bin.jar"/>
+	<classpathentry kind="lib" path="/local-scratch/SRiahi/workspace/lib/jdepend.jar"/>
+	<classpathentry kind="lib" path="/local-scratch/SRiahi/workspace/lib/jflex-1.4.2.jar"/>
+	<classpathentry kind="lib" path="/local-scratch/SRiahi/workspace/lib/jmathplot.jar"/>
+	<classpathentry kind="lib" path="/local-scratch/SRiahi/workspace/lib/junit.jar"/>
+	<classpathentry kind="lib" path="/local-scratch/SRiahi/workspace/lib/weka.jar"/>
+	<classpathentry kind="lib" path="/local-scratch/SRiahi/workspace/lib/xom-1.1.jar"/>
+	<classpathentry kind="lib" path="/local-scratch/SRiahi/workspace/lib/jgrapht-jdk1.6.jar"/>
+	<classpathentry kind="lib" path="/local-scratch/SRiahi/workspace/lib/jh.jar"/>
+	<classpathentry kind="lib" path="/local-scratch/SRiahi/workspace/lib/ibatis-common-2.jar"/>
+	<classpathentry kind="lib" path="/local-scratch/SRiahi/workspace/lib/commons-collections-3.1.jar"/>
+	<classpathentry kind="lib" path="/local-scratch/SRiahi/workspace/lib/msbase.jar"/>
+	<classpathentry kind="lib" path="/local-scratch/SRiahi/workspace/lib/mtj.jar"/>
+	<classpathentry kind="lib" path="/local-scratch/SRiahi/workspace/lib/opt77.jar"/>
+	<classpathentry kind="lib" path="/local-scratch/SRiahi/workspace/lib/packageManager.jar"/>
+	<classpathentry kind="lib" path="/local-scratch/SRiahi/workspace/lib/commons-lang-2.6.jar"/>
+	<classpathentry kind="lib" path="/local-scratch/SRiahi/workspace/lib/pal-1.4.jar"/>
+	<classpathentry kind="lib" path="/local-scratch/SRiahi/workspace/lib/jmatharray.jar"/>
+	<classpathentry kind="lib" path="/local-scratch/SRiahi/workspace/lib/mrjtoolkitstubs.jar"/>
+	<classpathentry kind="lib" path="/local-scratch/SRiahi/workspace/lib/colt.jar"/>
+	<classpathentry kind="lib" path="/local-scratch/SRiahi/workspace/lib/bayesLearner.jar"/>
+	<classpathentry kind="lib" path="/local-scratch/SRiahi/workspace/lib/mysql-connector-java-5.1.18-bin.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
