@@ -19,6 +19,7 @@ public class Convert_table{
 
 	private static Connection con_convert;
 	private static String dbname_convert;
+	private static String test_tbname="a_CT";
 
 
 	
@@ -53,10 +54,24 @@ public class Convert_table{
 
 	}
 
+	public static ArrayList<String> find_primaryKey(String dbname_convert, String test_tbname) throws Exception{
+
+		Statement st = con_convert.createStatement();
+		ResultSet rst = st.executeQuery("SHOW KEYS FROM "+ dbname_convert +"."+ test_tbname +" WHERE Key_name = 'PRIMARY';");
+		ArrayList<String> sets = new ArrayList<String>();
+		/*while(rst.next()){
+			System.out.println(rst.getString(0));
+			
+			sets.add(rst.getString(0));
+		}*/
+		return sets;
+	}
+
 
 	//main function
 	public static void Convert_table(){
 		long t1 = System.currentTimeMillis(); 
+		ArrayList<String> primaryKey = new ArrayList<String>();
 		System.out.println("Start convert...");
 
 		try{
@@ -65,6 +80,20 @@ public class Convert_table{
 			System.err.println("Could not connect to the database " + dbname_convert );
 			//throw new Exception();
 		}
+
+		try{
+			primaryKey = find_primaryKey(dbname_convert,test_tbname);
+		} catch (Exception e) {
+			System.err.println("Could not run primaryKey function..." );
+			//throw new Exception();
+		}
+
+		
+		if(primaryKey.size() == 0)
+			System.out.println("The table didn't have primary Key... ");
+
+
+		
 
 		/*
 
