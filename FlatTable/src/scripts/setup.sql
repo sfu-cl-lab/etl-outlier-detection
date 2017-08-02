@@ -15,16 +15,23 @@ SET storage_engine=INNODB;
 
 /* Simplly copy the a_CT table from @database@_CT  */
 
-CREATE TABLE a_CT AS SELECT MULT,
+CREATE TABLE ab_CT AS SELECT `ID(student0)`,
+	MULT,
+	`diff(course0)`,
     `popularity(prof0)`,
+    `rating(course0)`,
     `teachingability(prof0)`,
     `intelligence(student0)`,
     `ranking(student0)`,
     `capability(prof0,student0)`,
     `salary(prof0,student0)`,
-    a FROM unielwin_CT.a_CT;
+    `grade(course0,student0)`,
+    `sat(course0,student0)`,
+    a,
+    b FROM unielwin_CT.`a,b_CT`;
 
 
+CREATE TABLE test AS SELECT * FROM `ab_CT`; 
 
 
 
