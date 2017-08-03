@@ -20,6 +20,7 @@ public class Convert_table{
 	private static Connection con_convert;
 	private static String dbname_convert;
 	private static String test_tbname="test";
+	private static String id_column;
 
 
 	
@@ -80,15 +81,43 @@ public class Convert_table{
 		return sets;
 	}
 
-	public static ArrayList<String> find_diffID(String column_name) throws Exception{
+	public static ArrayList<Integer> find_diffID(String column_name) throws Exception{
 
 		Statement st = con_convert.createStatement();
 		ResultSet rst = st.executeQuery("SELECT DISTINCT `"+ column_name +"` FROM `" + test_tbname + "`;");
-		ArrayList<String> sets = new ArrayList<String>();
+		ArrayList<Integer> sets = new ArrayList<Integer>();
 		while(rst.next()){
 			//System.out.println("NEW ID: "+rst.getString(column_name));
-			sets.add(rst.getString(column_name));
+			sets.add(rst.getInt(column_name));
 		}
+		return sets;
+	}
+
+	public static ArrayList<String> selectFromId(int id,ArrayList<Integer> instance ) throws Exception{
+		Statement st = con_convert.createStatement();
+		ResultSet rst = st.executeQuery("SELECT * FROM `"+ test_tbname +"` WHERE `" + id_column + "` = " + id + ";");
+		ArrayList<String> sets = new ArrayList<String>();
+		//ArrayList<Integer> instance = new ArrayList<Integer>();
+		int i=0;
+		String instance_name = "";
+		while(rst.next()){
+			/*System.out.println("INSTANCE:"+rst.getInt(1)+"//"+rst.getInt(2)+"//"+rst.getString(3)+"//"+rst.getString(4)+"//"+rst.getString(5)
+				+"//"+rst.getString(6)+"//"+rst.getString(7)+"//"+rst.getString(8)+"//"+rst.getString(9)+"//"+rst.getString(10)
+				+"//"+rst.getString(11)+"//"+rst.getString(12)+"//"+rst.getString(13)+"//"+rst.getString(14)+",ok");*/
+
+			instance_name = "("+rst.getString(3)+","+rst.getString(4)+","+rst.getString(5)+","+rst.getString(6)
+			+","+rst.getString(7)+","+rst.getString(8)+","+rst.getString(9)+","+rst.getString(10)+","+rst.getString(11)
+			+","+rst.getString(12)+","+rst.getString(13)+","+rst.getString(14)+")";
+
+			instance.add(rst.getInt(2));
+			//System.out.println("The mult of "+ instance_name + "is:" +instance.get(i));
+			i++;
+			sets.add(instance_name);
+			
+		}
+		//int[] n = (int[])instance.toArray(new int[instance.size()]);
+		//MultForID.add(n);
+
 		return sets;
 	}
 
@@ -98,8 +127,11 @@ public class Convert_table{
 	public static void Convert_table(){
 		long t1 = System.currentTimeMillis(); 
 		ArrayList<String> column_name = new ArrayList<String>();
-		ArrayList<String> id = new ArrayList<String>();
-		String id_column;
+		ArrayList<Integer> id = new ArrayList<Integer>();
+		ArrayList<String> id_instance = new ArrayList<String>();
+		ArrayList<ArrayList<Integer>> MultForID = new ArrayList<ArrayList<Integer>>();
+		ArrayList<Integer> instance = new ArrayList<Integer>();
+	    //int count = 0;
 		System.out.println("Start convert...");
 
 		//connect database
@@ -110,14 +142,28 @@ public class Convert_table{
 			//throw new Exception();
 		}
 
-		//select the ID column name and find all different ID at store into a ArrayList
+		//select the ID column name and find all different ID at store into a id ArrayList
 		try{
 			column_name = find_columnName(test_tbname);
 			id_column = column_name.get(0);
-			System.out.println(id_column);
+			System.out.println("The id column name is: "+id_column);
 			id = find_diffID(id_column);
 		} catch (Exception e) {
 			System.err.println("Could get the ID column name and diffID !");
+			System.err.println(e);
+		}  
+
+		//select the mult for each instance about each id and store into a ArrayList<ArrayList<Integer>>
+		try{
+			for(int count=0;count<id.size();count++){
+				instance = new ArrayList<Integer>();
+				id_instance = selectFromId(id.get(count),instance);
+				MultForID.add(instance);
+				System.out.println("The mult for each instance of id "+ id.get(count) + " is " + MultForID.get(count));
+			}
+			
+		} catch (Exception e) {
+			System.err.println("Could not select id instance from database ! ");
 			System.err.println(e);
 		}
 
