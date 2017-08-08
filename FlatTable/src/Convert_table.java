@@ -7,6 +7,8 @@ import java.sql.SQLException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.lang.*;
+import java.util.*;
+import java.util.Map.Entry;
 
 
 public class Convert_table{
@@ -93,11 +95,12 @@ public class Convert_table{
 		return sets;
 	}
 
-	public static ArrayList<String> selectFromId(int id,ArrayList<Integer> instance ) throws Exception{
+	public static ArrayList<String> selectFromId(int id,ArrayList<Integer> instance_mult) throws Exception{
+		//@ This function return the instance_name and instance_mult for each id 
 		Statement st = con_convert.createStatement();
 		ResultSet rst = st.executeQuery("SELECT * FROM `"+ test_tbname +"` WHERE `" + id_column + "` = " + id + ";");
 		ArrayList<String> sets = new ArrayList<String>();
-		//ArrayList<Integer> instance = new ArrayList<Integer>();
+		
 		int i=0;
 		String instance_name = "";
 		while(rst.next()){
@@ -109,29 +112,50 @@ public class Convert_table{
 			+","+rst.getString(7)+","+rst.getString(8)+","+rst.getString(9)+","+rst.getString(10)+","+rst.getString(11)
 			+","+rst.getString(12)+","+rst.getString(13)+","+rst.getString(14)+")";
 
-			instance.add(rst.getInt(2));
+			instance_mult.add(rst.getInt(2));
 			//System.out.println("The mult of "+ instance_name + "is:" +instance.get(i));
 			i++;
 			sets.add(instance_name);
 			
 		}
-		//int[] n = (int[])instance.toArray(new int[instance.size()]);
-		//MultForID.add(n);
 
 		return sets;
 	}
 
+	public static void Map_instance( ArrayList<ArrayList<String>> Id_instance, HashMap<String,Integer> convert_column ) throws Exception{
+		//@ This function is to map all different instacnce in Id_instance to init the convert column name
+		for(int i=0;i<Id_instance.size();i++){
+
+			for(int j=0;j<Id_instance.get(i).size();j++){
+				String column =  Id_instance.get(i).get(j);
+				//System.out.println(Id_instance.get(i).get(j));
+				if(!(convert_column.containsKey(column))){
+					convert_column.put(column,1);
+				}else{
+					convert_column.put(column,convert_column.get(column)+1);
+				}
+			}
+
+		}
 
 
-	//main function
+	}
+
+
+
+	//@ Main function process
 	public static void Convert_table(){
 		long t1 = System.currentTimeMillis(); 
 		ArrayList<String> column_name = new ArrayList<String>();
 		ArrayList<Integer> id = new ArrayList<Integer>();
-		ArrayList<String> id_instance = new ArrayList<String>();
+		ArrayList<ArrayList<String>> Id_instance = new ArrayList<ArrayList<String>>();
 		ArrayList<ArrayList<Integer>> MultForID = new ArrayList<ArrayList<Integer>>();
-		ArrayList<Integer> instance = new ArrayList<Integer>();
-	    //int count = 0;
+		ArrayList<Integer> instance_mult = new ArrayList<Integer>();
+		ArrayList<String> instance_name = new ArrayList<String>();
+		HashMap<String,Integer> convert_column = new HashMap<String,Integer>();
+
+
+	    
 		System.out.println("Start convert...");
 
 		//connect database
@@ -147,19 +171,26 @@ public class Convert_table{
 			column_name = find_columnName(test_tbname);
 			id_column = column_name.get(0);
 			System.out.println("The id column name is: "+id_column);
+			//find different id values from id_column
 			id = find_diffID(id_column);
 		} catch (Exception e) {
 			System.err.println("Could get the ID column name and diffID !");
 			System.err.println(e);
 		}  
 
-		//select the mult for each instance about each id and store into a ArrayList<ArrayList<Integer>>
+		//@ select the mult for each instance about each id and store into a ArrayList<ArrayList<Integer>>
 		try{
 			for(int count=0;count<id.size();count++){
-				instance = new ArrayList<Integer>();
-				id_instance = selectFromId(id.get(count),instance);
-				MultForID.add(instance);
+				instance_mult = new ArrayList<Integer>();
+				instance_name = selectFromId(id.get(count),instance_mult);
+				MultForID.add(instance_mult);
+				Id_instance.add(instance_name);
+
+				System.out.println(" ");
+				System.out.println("********************************************************************************************");
 				System.out.println("The mult for each instance of id "+ id.get(count) + " is " + MultForID.get(count));
+				System.out.println("The instance _name for each instance of id "+ id.get(count) + " is " + Id_instance.get(count));
+
 			}
 			
 		} catch (Exception e) {
@@ -167,6 +198,26 @@ public class Convert_table{
 			System.err.println(e);
 		}
 
+		try{
+			//@ Find a list of unique column names for convert
+			Map_instance(Id_instance,convert_column);
+
+			for(Entry<String,Integer> entry : convert_column.entrySet()){
+				String key = entry.getKey();
+				Integer value = entry.getValue();
+				System.out.println("THE DIFFERENT  CONVERT COLUMN IS : "+ key +", value: " + value);
+			}
+
+			/*for(TypeKey column: convert_column.KeySet()){
+				String key = column.toString();
+				Integer value = convert_column.get(column).toInt();
+				System.out.println("ALL DIFFERENT  CONVERT COLUMN IS : "+ key +", value: " + value);
+			}*/
+			
+		} catch (Exception e) {
+			System.err.println("Could not Map the instacnce to get convert column name! ");
+			System.err.println(e);
+		}
 
 		/*
 		if(primaryKey.size() == 0)
@@ -177,18 +228,11 @@ public class Convert_table{
 			}
 		}*/
 
+		for(int i=0;i<id.size();i++)
+			System.out.println("The instance size of id "+id.get(i) +" is " + Id_instance.get(i).size());
 
-		
-
-		/*
-
-
-
-
-
-
-
-		*/
+		//System.out.println("The size of Id is "+ id.get(0));
+		//System.out.println("The size of Id_instance is "+ Id_instance.get(0).get(0));
 
 		long t2 = System.currentTimeMillis(); 
 		System.out.println("Total Running time is " + (t2-t1) + "ms.");
