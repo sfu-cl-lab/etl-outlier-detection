@@ -96,14 +96,20 @@ public class Convert_table{
 		return sets;
 	}
 
+	// First main procedure. For each id, go through each row in the CT table that contains the ID, and find each value in the CT table, 
+	// concatenate them to form a row id = column name in converted table.
+	
 	public static ArrayList<String> selectFromId(int id,ArrayList<Integer> instance_mult) throws Exception{
+		// given input id, make a list Instance_mult that is indexed by the id, and contains a list of mults //
 		//@ This function return the instance_name and instance_mult for each id 
 		Statement st = con_convert.createStatement();
 		ResultSet rst = st.executeQuery("SELECT * FROM `"+ test_tbname +"` WHERE `" + id_column + "` = " + id + ";");
 		ArrayList<String> sets = new ArrayList<String>();
+		// make a list sets that is indexed by the id, and contains a list of strings that are row_ids. 
+		//A row_id is a list of values in the CT table//
 		
 		int i=0;
-		String instance_name = "";
+		String instance_name = ""; // could also be called "row name"
 		while(rst.next()){
 			/*System.out.println("INSTANCE:"+rst.getInt(1)+"//"+rst.getInt(2)+"//"+rst.getString(3)+"//"+rst.getString(4)+"//"+rst.getString(5)
 				+"//"+rst.getString(6)+"//"+rst.getString(7)+"//"+rst.getString(8)+"//"+rst.getString(9)+"//"+rst.getString(10)
@@ -116,7 +122,7 @@ public class Convert_table{
 			instance_mult.add(rst.getInt(2));
 			//System.out.println("The mult of "+ instance_name + "is:" +instance.get(i));
 			i++;
-			sets.add(instance_name);
+			sets.add(instance_name);  
 			
 		}
 
@@ -124,13 +130,15 @@ public class Convert_table{
 	}
 
 	//@ This function is to map all different instacnce in Id_instance to init the convert column name
+	//ID_instance is indexed by ids. For each id, contains all instance_ids (= row_ids)
 	public static void Map_instance( ArrayList<ArrayList<String>> Id_instance, HashMap<String,Integer> convert_column ) throws Exception{
 
-		for(int i=0;i<Id_instance.size();i++){
+		for(int i=0;i<Id_instance.size();i++){ // loop through all ids, find the list of row_ids for that id
 
 			for(int j=0;j<Id_instance.get(i).size();j++){
 				String column =  Id_instance.get(i).get(j);
 				//System.out.println(Id_instance.get(i).get(j));
+				// add instance ids to hash map called convert_column
 				if(!(convert_column.containsKey(column))){
 					convert_column.put(column,1);
 				}else{
@@ -145,7 +153,7 @@ public class Convert_table{
 
 
 
-	//@ Set the convert columns 
+	//@ Set the convert columns . Go through the hash map of row_ids and make them column names in SQL
 	public static void Set_Columns( String tablename , HashMap<String,Integer> convert_column ) throws Exception{
 
 		Statement st = con_convert.createStatement();
@@ -174,18 +182,18 @@ public class Convert_table{
 		for(int i=0; i<Id_instance.size();i++){
 			String newsql = "INSERT INTO " + dbname_convert + "." + tablename + " ( id ";
 
-			for(int j=0;j<Id_instance.get(i).size();j++){
+			for(int j=0;j<Id_instance.get(i).size();j++){ //for each id, loop through its column names
 				String column = Id_instance.get(i).get(j);
 				newsql += ", `" + column + "` ";
 			}
-			newsql += " ) VALUES ( " + id.get(i);
+			newsql += " ) VALUES ( " + id.get(i); //get the primary key value
 
-			for(int k =0;k<MultForID.get(i).size();k++){
-				int mult = MultForID.get(i).get(k);
+			for(int k =0;k<MultForID.get(i).size();k++){ //go through the mults for the id. The index k should point to the right row_id.
+				int mult = MultForID.get(i).get(k); //find the mult for the given id and the given row_id. The KEY STATEMENT.
 				newsql += ", " + mult; 
 			}
 			newsql += " );";
-			int rst = st.executeUpdate(newsql);
+			int rst = st.executeUpdate(newsql); //THE BIG ONE. CREATES THE WHOLE CONVERTED TABLE.
 			System.out.println("%%%%%% The insert sql for id "+ id.get(i) + " is :" +newsql);
 		}
 
@@ -196,13 +204,14 @@ public class Convert_table{
 	//@ Main function process
 	public static void Convert_table(){
 		long t1 = System.currentTimeMillis(); 
-		ArrayList<String> column_name = new ArrayList<String>();
-		ArrayList<Integer> id = new ArrayList<Integer>();
-		ArrayList<ArrayList<String>> Id_instance = new ArrayList<ArrayList<String>>();
+		ArrayList<String> column_name = new ArrayList<String>(); //temporarily stores list of row_ids for each id
+		ArrayList<Integer> id = new ArrayList<Integer>(); //lists all ids
+		ArrayList<ArrayList<String>> Id_instance = new ArrayList<ArrayList<String>>(); //for each id, contains list of row_ids
 		ArrayList<ArrayList<Integer>> MultForID = new ArrayList<ArrayList<Integer>>();
-		ArrayList<Integer> instance_mult = new ArrayList<Integer>();
-		ArrayList<String> instance_name = new ArrayList<String>();
-		HashMap<String,Integer> convert_column = new HashMap<String,Integer>();
+		ArrayList<Integer> instance_mult = new ArrayList<Integer>(); // for each id, contains list of mult values
+		ArrayList<String> instance_name = new ArrayList<String>(); //temporarily stores list of row_ids for each id
+		HashMap<String,Integer> convert_column = new HashMap<String,Integer>(); //hash map for list of all row_ids 
+		//to be made columns in converted table
 
 
 	    
