@@ -23,6 +23,7 @@ public class Convert_table{
 	private static String dbname_convert;
 	private static String test_tbname="test";
 	private static String id_column;
+	private static String table_convert = "ab_CT_convert";
 
 
 	
@@ -122,8 +123,9 @@ public class Convert_table{
 		return sets;
 	}
 
+	//@ This function is to map all different instacnce in Id_instance to init the convert column name
 	public static void Map_instance( ArrayList<ArrayList<String>> Id_instance, HashMap<String,Integer> convert_column ) throws Exception{
-		//@ This function is to map all different instacnce in Id_instance to init the convert column name
+
 		for(int i=0;i<Id_instance.size();i++){
 
 			for(int j=0;j<Id_instance.get(i).size();j++){
@@ -138,6 +140,54 @@ public class Convert_table{
 
 		}
 
+
+	}
+
+
+
+	//@ Set the convert columns 
+	public static void Set_Columns( String tablename , HashMap<String,Integer> convert_column ) throws Exception{
+
+		Statement st = con_convert.createStatement();
+		String newsql = "CREATE TABLE " + tablename +"( id int(11)  NOT NULL, ";
+
+		for(Entry<String,Integer> entry : convert_column.entrySet()){
+				String key = entry.getKey();
+				newsql += " `" + key +"` int(11) , ";
+				
+			}
+
+			newsql+=" PRIMARY KEY ( id ) );";
+
+			int rst = st.executeUpdate(newsql);
+
+		System.out.println(rst + "######"+newsql);
+
+	}
+
+
+	//@ insert each instance from each id
+	public static void Insert_instance( String tablename, ArrayList<Integer> id , ArrayList<ArrayList<Integer>> MultForID ,ArrayList<ArrayList<String>> Id_instance ) throws Exception {
+
+		Statement st = con_convert.createStatement();
+		
+		for(int i=0; i<Id_instance.size();i++){
+			String newsql = "INSERT INTO " + dbname_convert + "." + tablename + " ( id ";
+
+			for(int j=0;j<Id_instance.get(i).size();j++){
+				String column = Id_instance.get(i).get(j);
+				newsql += ", `" + column + "` ";
+			}
+			newsql += " ) VALUES ( " + id.get(i);
+
+			for(int k =0;k<MultForID.get(i).size();k++){
+				int mult = MultForID.get(i).get(k);
+				newsql += ", " + mult; 
+			}
+			newsql += " );";
+			int rst = st.executeUpdate(newsql);
+			System.out.println("%%%%%% The insert sql for id "+ id.get(i) + " is :" +newsql);
+		}
 
 	}
 
@@ -219,6 +269,28 @@ public class Convert_table{
 			System.err.println(e);
 		}
 
+
+
+		try{
+			
+			Set_Columns(table_convert,convert_column);
+
+		} catch (Exception e) {
+			System.err.println("Could not set up convert columns!!! ");
+			System.err.println(e);
+		}
+
+
+
+		try{
+			
+			Insert_instance(table_convert,id,MultForID,Id_instance);
+
+		} catch (Exception e) {
+			System.err.println("Could not insert instance into convert table !!! ");
+			System.err.println(e);
+		}
+
 		/*
 		if(primaryKey.size() == 0)
 			System.out.println("The table didn't have primary Key... ");
@@ -228,8 +300,10 @@ public class Convert_table{
 			}
 		}*/
 
-		for(int i=0;i<id.size();i++)
-			System.out.println("The instance size of id "+id.get(i) +" is " + Id_instance.get(i).size());
+		/*for(int i=0;i<id.size();i++)
+			System.out.println("The instance size of id "+id.get(i) +" is " + Id_instance.get(i).size());*/
+
+		
 
 		//System.out.println("The size of Id is "+ id.get(0));
 		//System.out.println("The size of Id_instance is "+ Id_instance.get(0).get(0));
