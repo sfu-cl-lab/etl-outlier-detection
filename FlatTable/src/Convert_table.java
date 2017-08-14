@@ -21,10 +21,97 @@ public class Convert_table{
 
 	private static Connection con_convert;
 	private static String dbname_convert;
-	private static String test_tbname="test";
-	private static String id_column;
 	private static String table_convert = "ab_CT_convert";
 
+
+
+	//@ Overload 
+    public static void Convert_table ( String dbname, String tablename, String column ) throws Exception{
+        //THE INPUT: dbname is database name, tablename is the original table name, column is primary column name in original table 
+
+        long t1 = System.currentTimeMillis(); 
+       
+        ArrayList<Integer> id = new ArrayList<Integer>();
+        ArrayList<ArrayList<String>> Id_instance = new ArrayList<ArrayList<String>>();
+        ArrayList<ArrayList<Integer>> MultForID = new ArrayList<ArrayList<Integer>>();
+        ArrayList<Integer> instance_mult = new ArrayList<Integer>();
+        ArrayList<String> instance_name = new ArrayList<String>();
+        HashMap<String,Integer> convert_column = new HashMap<String,Integer>();
+        String convert_tablename = tablename + "_convert";
+        Connection convert_con;
+
+        
+        System.out.println("Start convert...");
+
+
+        //Set Config
+        setVarsFromConfig();
+
+        //@ Connect database
+        convert_con = connectDB(dbname);
+
+        //@ Find different id values from id_column
+        id = find_diffID(convert_con,column,tablename);
+
+
+        //@ Select the mult for each instance about each id and store into a ArrayList<ArrayList<Integer>>
+        for(int count=0;count<id.size();count++){
+                instance_mult = new ArrayList<Integer>();
+                instance_name = selectFromId(convert_con,id.get(count),column,tablename,instance_mult);
+                MultForID.add(instance_mult);
+                Id_instance.add(instance_name);
+
+                System.out.println(" ");
+                System.out.println("********************************************************************************************");
+                System.out.println("The mult for each instance of id "+ id.get(count) + " is " + MultForID.get(count));
+                System.out.println("The instance _name for each instance of id "+ id.get(count) + " is " + Id_instance.get(count));
+
+            }
+
+
+        //@ Find a list of unique column names for convert
+        Map_instance(Id_instance,convert_column);
+
+        for(Entry<String,Integer> entry : convert_column.entrySet()){
+            String key = entry.getKey();
+            Integer value = entry.getValue();
+            System.out.println("THE DIFFERENT  CONVERT COLUMN IS : "+ key +", value: " + value);
+        }
+
+
+        //@ Set all different instance in convert table
+        Set_Columns(convert_con,convert_tablename,convert_column);
+
+
+        //@ Insert instance for each id
+        Insert_instance(convert_con,convert_tablename,id,MultForID,Id_instance);
+        
+
+        long t2 = System.currentTimeMillis(); 
+        System.out.println("Total Running time is " + (t2-t1) + "ms.");
+        disconnectDB(convert_con);
+
+
+    }
+
+
+
+	public static void main(String[] args) throws SQLException, IOException{
+		
+		//init();
+		String dbname = "unielwin_convert",tablename = "test",column = "ID(student0)";
+
+		try{
+			Convert_table(dbname,tablename,column);
+			//Convert_table();
+		} catch (Exception e) {
+			System.err.println( e ) ;
+		}
+		
+
+		//disconnectDB(con_convert);
+
+	}
 
 	
 	public static void setVarsFromConfig(){
@@ -58,36 +145,11 @@ public class Convert_table{
 
 	}
 
-	public static ArrayList<String> find_primaryKey(String dbname_convert, String test_tbname) throws Exception{
 
-		Statement st = con_convert.createStatement();
-		ResultSet rst = st.executeQuery("SHOW KEYS FROM "+ dbname_convert +"."+ test_tbname +" WHERE Key_name = 'PRIMARY';");
-		ArrayList<String> sets = new ArrayList<String>();
-		while(rst.next()){
-			System.out.println(rst.getString(0));
-			
-			sets.add(rst.getString(0));
-		}
-		return sets;
-	}
+	public static ArrayList<Integer> find_diffID(Connection con, String column_name,String tablename) throws Exception{
 
-	public static ArrayList<String> find_columnName(String test_tbname) throws Exception{
-		//Because we couldn't set up a primary key,we should get ID column name from this function
-		Statement st = con_convert.createStatement();
-		ResultSet rst = st.executeQuery("SELECT column_name FROM information_schema.columns WHERE table_name =  '"+ test_tbname +"';");
-		ArrayList<String> sets = new ArrayList<String>();
-		while(rst.next()){
-			//System.out.println(rst.getString("column_name"));
-			
-			sets.add(rst.getString("column_name"));
-		}
-		return sets;
-	}
-
-	public static ArrayList<Integer> find_diffID(String column_name) throws Exception{
-
-		Statement st = con_convert.createStatement();
-		ResultSet rst = st.executeQuery("SELECT DISTINCT `"+ column_name +"` FROM `" + test_tbname + "`;");
+		Statement st = con.createStatement();
+		ResultSet rst = st.executeQuery("SELECT DISTINCT `"+ column_name +"` FROM `" + tablename + "`;");
 		ArrayList<Integer> sets = new ArrayList<Integer>();
 		while(rst.next()){
 			//System.out.println("NEW ID: "+rst.getString(column_name));
@@ -99,11 +161,11 @@ public class Convert_table{
 	// First main procedure. For each id, go through each row in the CT table that contains the ID, and find each value in the CT table, 
 	// concatenate them to form a row id = column name in converted table.
 	
-	public static ArrayList<String> selectFromId(int id,ArrayList<Integer> instance_mult) throws Exception{
+	public static ArrayList<String> selectFromId(Connection con,int id,String id_column, String tablename, ArrayList<Integer> instance_mult) throws Exception{
 		// given input id, make a list Instance_mult that is indexed by the id, and contains a list of mults //
 		//@ This function return the instance_name and instance_mult for each id 
-		Statement st = con_convert.createStatement();
-		ResultSet rst = st.executeQuery("SELECT * FROM `"+ test_tbname +"` WHERE `" + id_column + "` = " + id + ";");
+		Statement st = con.createStatement();
+		ResultSet rst = st.executeQuery("SELECT * FROM `"+ tablename +"` WHERE `" + id_column + "` = " + id + ";");
 		ArrayList<String> sets = new ArrayList<String>();
 		// make a list sets that is indexed by the id, and contains a list of strings that are row_ids. 
 		//A row_id is a list of values in the CT table//
@@ -129,7 +191,7 @@ public class Convert_table{
 		return sets;
 	}
 
-	//@ This function is to map all different instacnce in Id_instance to init the convert column name
+	//@ This function is to map all different instacnce in Id_instance to initialize the convert column name
 	//ID_instance is indexed by ids. For each id, contains all instance_ids (= row_ids)
 	public static void Map_instance( ArrayList<ArrayList<String>> Id_instance, HashMap<String,Integer> convert_column ) throws Exception{
 
@@ -154,20 +216,24 @@ public class Convert_table{
 
 
 	//@ Set the convert columns . Go through the hash map of row_ids and make them column names in SQL
-	public static void Set_Columns( String tablename , HashMap<String,Integer> convert_column ) throws Exception{
+	public static void Set_Columns( Connection con, String tablename , HashMap<String,Integer> convert_column ) throws Exception{
 
-		Statement st = con_convert.createStatement();
+		Statement st = con.createStatement();
+
+		String checkSQL = "DROP TABLE IF EXISTS " + tablename + " ;";
+		int rst = st.executeUpdate(checkSQL);
+
 		String newsql = "CREATE TABLE " + tablename +"( id int(11)  NOT NULL, ";
 
 		for(Entry<String,Integer> entry : convert_column.entrySet()){
 				String key = entry.getKey();
-				newsql += " `" + key +"` int(11) , ";
+				newsql += " `" + key +"` int(11)  DEFAULT 0 , ";
 				
 			}
 
 			newsql+=" PRIMARY KEY ( id ) );";
 
-			int rst = st.executeUpdate(newsql);
+			rst = st.executeUpdate(newsql);
 
 		System.out.println(rst + "######"+newsql);
 
@@ -175,9 +241,9 @@ public class Convert_table{
 
 
 	//@ insert each instance from each id
-	public static void Insert_instance( String tablename, ArrayList<Integer> id , ArrayList<ArrayList<Integer>> MultForID ,ArrayList<ArrayList<String>> Id_instance ) throws Exception {
+	public static void Insert_instance(Connection con, String tablename, ArrayList<Integer> id , ArrayList<ArrayList<Integer>> MultForID ,ArrayList<ArrayList<String>> Id_instance ) throws Exception {
 
-		Statement st = con_convert.createStatement();
+		Statement st = con.createStatement();
 		
 		for(int i=0; i<Id_instance.size();i++){
 			String newsql = "INSERT INTO " + dbname_convert + "." + tablename + " ( id ";
@@ -205,6 +271,8 @@ public class Convert_table{
 	public static void Convert_table(){
 		long t1 = System.currentTimeMillis(); 
 		ArrayList<String> column_name = new ArrayList<String>(); //temporarily stores list of row_ids for each id
+		String tablename = "ab_CT";
+		String id_column = "ID(student0)";
 		ArrayList<Integer> id = new ArrayList<Integer>(); //lists all ids
 		ArrayList<ArrayList<String>> Id_instance = new ArrayList<ArrayList<String>>(); //for each id, contains list of row_ids
 		ArrayList<ArrayList<Integer>> MultForID = new ArrayList<ArrayList<Integer>>();
@@ -213,7 +281,8 @@ public class Convert_table{
 		HashMap<String,Integer> convert_column = new HashMap<String,Integer>(); //hash map for list of all row_ids 
 		//to be made columns in converted table
 
-
+		setVarsFromConfig();
+		System.out.println("Set variables");
 	    
 		System.out.println("Start convert...");
 
@@ -225,13 +294,12 @@ public class Convert_table{
 			//throw new Exception();
 		}
 
+
 		//select the ID column name and find all different ID at store into a id ArrayList
 		try{
-			column_name = find_columnName(test_tbname);
-			id_column = column_name.get(0);
-			System.out.println("The id column name is: "+id_column);
+			
 			//find different id values from id_column
-			id = find_diffID(id_column);
+			id = find_diffID(con_convert,id_column,tablename);
 		} catch (Exception e) {
 			System.err.println("Could get the ID column name and diffID !");
 			System.err.println(e);
@@ -241,7 +309,7 @@ public class Convert_table{
 		try{
 			for(int count=0;count<id.size();count++){
 				instance_mult = new ArrayList<Integer>();
-				instance_name = selectFromId(id.get(count),instance_mult);
+				instance_name = selectFromId(con_convert,id.get(count),id_column,tablename,instance_mult);
 				MultForID.add(instance_mult);
 				Id_instance.add(instance_name);
 
@@ -282,7 +350,7 @@ public class Convert_table{
 
 		try{
 			
-			Set_Columns(table_convert,convert_column);
+			Set_Columns(con_convert,table_convert,convert_column);
 
 		} catch (Exception e) {
 			System.err.println("Could not set up convert columns!!! ");
@@ -293,7 +361,7 @@ public class Convert_table{
 
 		try{
 			
-			Insert_instance(table_convert,id,MultForID,Id_instance);
+			Insert_instance(con_convert,table_convert,id,MultForID,Id_instance);
 
 		} catch (Exception e) {
 			System.err.println("Could not insert instance into convert table !!! ");
@@ -335,22 +403,10 @@ public class Convert_table{
 
 	}
 
-	public static void main(String[] args) throws SQLException, IOException{
-		
-		setVarsFromConfig();
-		System.out.println("Set variables");
-
-		init();
-		
-		Convert_table();
-
-		disconnectDB();
-
-	}
 
 
-	public static void disconnectDB() throws SQLException {
-		con_convert.close();
+	public static void disconnectDB(Connection con) throws SQLException {
+		con.close();
 	}
  
 
