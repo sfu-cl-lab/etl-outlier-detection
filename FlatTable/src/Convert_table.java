@@ -17,11 +17,9 @@ public class Convert_table{
 	static String dbPassword;
 	static String dbAddress;
 	static String dbName;
-	static String resultDB_name;
-
 	private static Connection con_convert;
 	private static String dbname_convert;
-	private static String table_convert = "ab_CT_convert";
+	
 
 
 
@@ -246,7 +244,7 @@ public class Convert_table{
 		Statement st = con.createStatement();
 		
 		for(int i=0; i<Id_instance.size();i++){
-			String newsql = "INSERT INTO " + dbname_convert + "." + tablename + " ( id ";
+			String newsql = "INSERT INTO " + tablename + " ( id ";
 
 			for(int j=0;j<Id_instance.get(i).size();j++){ //for each id, loop through its column names
 				String column = Id_instance.get(i).get(j);
@@ -273,6 +271,7 @@ public class Convert_table{
 		ArrayList<String> column_name = new ArrayList<String>(); //temporarily stores list of row_ids for each id
 		String tablename = "ab_CT";
 		String id_column = "ID(student0)";
+		String table_convert = tablename + "_convert";
 		ArrayList<Integer> id = new ArrayList<Integer>(); //lists all ids
 		ArrayList<ArrayList<String>> Id_instance = new ArrayList<ArrayList<String>>(); //for each id, contains list of row_ids
 		ArrayList<ArrayList<Integer>> MultForID = new ArrayList<ArrayList<Integer>>();
