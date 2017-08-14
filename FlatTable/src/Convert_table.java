@@ -18,7 +18,6 @@ public class Convert_table{
 	static String dbAddress;
 	static String dbName;
 	private static Connection con_convert;
-	private static String dbname_convert;
 	
 
 
@@ -29,12 +28,12 @@ public class Convert_table{
 
         long t1 = System.currentTimeMillis(); 
        
-        ArrayList<Integer> id = new ArrayList<Integer>();
-        ArrayList<ArrayList<String>> Id_instance = new ArrayList<ArrayList<String>>();
-        ArrayList<ArrayList<Integer>> MultForID = new ArrayList<ArrayList<Integer>>();
-        ArrayList<Integer> instance_mult = new ArrayList<Integer>();
-        ArrayList<String> instance_name = new ArrayList<String>();
-        HashMap<String,Integer> convert_column = new HashMap<String,Integer>();
+        ArrayList<Integer> id = new ArrayList<Integer>(); // list of all different ids
+        ArrayList<ArrayList<String>> Id_instance = new ArrayList<ArrayList<String>>(); // for each id, contains list of row_ids
+        ArrayList<ArrayList<Integer>> MultForID = new ArrayList<ArrayList<Integer>>(); // for each id, contains list of mult values
+        ArrayList<Integer> instance_mult = new ArrayList<Integer>();   //temporarily stores list of mult for one id
+        ArrayList<String> instance_name = new ArrayList<String>();     //temporarily stores list of row_ids for one id
+        HashMap<String,Integer> convert_column = new HashMap<String,Integer>();  // to be made columns in converted table
         String convert_tablename = tablename + "_convert";
         Connection convert_con;
 
@@ -44,15 +43,16 @@ public class Convert_table{
 
         //Set Config
         setVarsFromConfig();
+        System.out.println("Set variables from config...");
 
         //@ Connect database
         convert_con = connectDB(dbname);
 
-        //@ Find different id values from id_column
+        //@STEP 1: Find different id values from id_column
         id = find_diffID(convert_con,column,tablename);
 
 
-        //@ Select the mult for each instance about each id and store into a ArrayList<ArrayList<Integer>>
+        //@STEP 2: Select every instance mult and name for each id and add into the ArrayList<ArrayList<Integer>> and ArrayList<ArrayList<String>>
         for(int count=0;count<id.size();count++){
                 instance_mult = new ArrayList<Integer>();
                 instance_name = selectFromId(convert_con,id.get(count),column,tablename,instance_mult);
@@ -67,7 +67,7 @@ public class Convert_table{
             }
 
 
-        //@ Find a list of unique column names for convert
+        //@STEP 3: Find a list of unique column names for convert
         Map_instance(Id_instance,convert_column);
 
         for(Entry<String,Integer> entry : convert_column.entrySet()){
@@ -77,11 +77,11 @@ public class Convert_table{
         }
 
 
-        //@ Set all different instance in convert table
+        //@STEP 4: Set all different instance in convert table
         Set_Columns(convert_con,convert_tablename,convert_column);
 
 
-        //@ Insert instance for each id
+        //@STEP 5: Insert instance for each id
         Insert_instance(convert_con,convert_tablename,id,MultForID,Id_instance);
         
 
@@ -97,10 +97,10 @@ public class Convert_table{
 	public static void main(String[] args) throws SQLException, IOException{
 		
 		//init();
-		String dbname = "unielwin_convert",tablename = "test",column = "ID(student0)";
+		String database = "unielwin_convert",tablename = "test",column = "ID(student0)";
 
 		try{
-			Convert_table(dbname,tablename,column);
+			Convert_table(database,tablename,column);
 			//Convert_table();
 		} catch (Exception e) {
 			System.err.println( e ) ;
@@ -119,7 +119,6 @@ public class Convert_table{
 		dbUsername = conf.getProperty("dbusername");
 		dbPassword = conf.getProperty("dbpassword");
 		dbAddress = conf.getProperty("dbaddress");
-		dbname_convert = dbName + "_convert";
 
 	}
 
@@ -280,9 +279,10 @@ public class Convert_table{
 		HashMap<String,Integer> convert_column = new HashMap<String,Integer>(); //hash map for list of all row_ids 
 		//to be made columns in converted table
 
+
 		setVarsFromConfig();
+		String dbname_convert = dbName + "_convert";
 		System.out.println("Set variables");
-	    
 		System.out.println("Start convert...");
 
 		//connect database
