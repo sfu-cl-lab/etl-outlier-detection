@@ -40,7 +40,7 @@ public class MakeSetup {
 		bzsr.runScript("scripts/setup.sql");  
 		
         
-		disconnectDB();
+		disconnectDB(con_result);
 	}
 
 	//@Overload
@@ -51,14 +51,23 @@ public class MakeSetup {
 		BZScriptRunner bzsr = new BZScriptRunner(databasename,con_result);
 		bzsr.runScript("scripts/setup.sql"); 
 
-		disconnectDB();
+		disconnectDB(con_result);
 	}
+
+	/*public static void create_views() throws Exception{
+
+		setVarsFromConfig();
+		con_view = connectDB(databasename);
+		BZScriptRunner bzsr = new BZScriptRunner(databasename,con_result);
+		bzsr.runScript("scripts/setup.sql"); 
+
+		disconnectDB(con_view);
+	}*/
 	
 	
 	public static void setVarsFromConfig(){
 		Config conf = new Config();
 		dbname = conf.getProperty("dbname");
-		//databaseName_result = dbname + "_setup";
 		dbUsername = conf.getProperty("dbusername");
 		dbPassword = conf.getProperty("dbpassword");
 		dbaddress = conf.getProperty("dbaddress");
@@ -96,8 +105,8 @@ public class MakeSetup {
 
 	}
 	
-	public static void disconnectDB() throws SQLException {
-		con_result.close();
+	public static void disconnectDB(Connection con) throws SQLException {
+		con.close();
 	}
 
 

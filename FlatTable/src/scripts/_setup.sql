@@ -1,24 +1,27 @@
 
 
 
-DROP SCHEMA IF EXISTS unielwin_convert; 
-create schema unielwin_convert;
+DROP SCHEMA IF EXISTS unielwin_convert_convert; 
+create schema unielwin_convert_convert;
 
 
-USE unielwin_convert;
+USE unielwin_convert_convert;
 SET storage_engine=INNODB;
 
 
 
 
 
-CREATE TABLE a_CT AS SELECT MULT,
-    `popularity(prof0)`,
-    `teachingability(prof0)`,
-    `intelligence(student0)`,
-    `ranking(student0)`,
-    `capability(prof0,student0)`,
-    `salary(prof0,student0)`,
-    a FROM unielwin_CT.a_CT;
+DROP TABLE IF EXISTS `a,b_CT`;
+CREATE TABLE `a,b_CT` AS SELECT * FROM unielwin_CT.`a,b_CT`;
+
+DROP TABLE IF EXISTS `a_CT`;
+CREATE TABLE `a_CT` AS SELECT * FROM unielwin_CT.`a_CT`;
+
+DROP TABLE IF EXISTS `b_CT`;
+CREATE TABLE `b_CT` AS SELECT * FROM unielwin_CT.`b_CT`;
+
+
+
 
 
