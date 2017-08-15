@@ -23,6 +23,7 @@ Output: A single data table where each row represents a target instance and each
 
       Download the source code to your local computer.
       Modify `src/config.cfg` with your own configuration according to the sample format explained in the image.
+      
       ![Sample Configuration](/FlatTable/src/images/configuration.png).
       
       The "dbname" represents the name of schema which stores the converted tables.
