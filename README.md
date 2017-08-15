@@ -17,6 +17,7 @@ Output: A single data table where each row represents a target instance and each
 1. **Run Bayesian Network to get Contingency Tables**
 
      We provide [FactorBase](https://github.com/sfu-cl-lab/FactorBase) to make a Bayesian network that shows probabilistic dependencies between the relationships and attributes represented in the database. 
+     Note that the default setting of the original contingency tables in source code is "unielwin_CT" database. So before compile you should modify the `scripts/setup.sql` to replace "unielwin_CT" with correct original table path.
         
         
 2. **Point to the required database in your MySQL server**  
