@@ -18,6 +18,7 @@ public class Convert_table{
 	private static String dbUsername;
 	private static String dbPassword;
 	private static String dbAddress;
+	private static String database;
 	private static String dbname;      // schema name
 	private static String column;      // primary key column name
 	private static String tablename;   //original table name
@@ -123,6 +124,7 @@ public class Convert_table{
 		dbAddress = conf.getProperty("dbaddress");
 		column = conf.getProperty("column");
 		tablename = conf.getProperty("tablename");
+		database = conf.getProperty("database");
 
 	}
 
@@ -277,7 +279,7 @@ public class Convert_table{
 		MakeSetup set = new MakeSetup();
 
 		try{
-			set.setup_for_convert(dbname);
+			set.setup_for_convert(database);
 			System.out.println("Successfully initialize the convert schema...");
 		} catch (Exception e) {
 			System.err.println("Setup failed!!!" );
