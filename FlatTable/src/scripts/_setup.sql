@@ -1,11 +1,11 @@
 
 
 
-DROP SCHEMA IF EXISTS unielwin_convert_convert; 
-create schema unielwin_convert_convert;
+DROP SCHEMA IF EXISTS unielwin_convert; 
+create schema unielwin_convert;
 
 
-USE unielwin_convert_convert;
+USE unielwin_convert;
 SET storage_engine=INNODB;
 
 
