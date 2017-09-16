@@ -100,7 +100,7 @@ public class Convert_table{
 		setVarsFromConfig();
 		System.out.println("Set variables from config...");
 		// initialize the convert schema by transferring from unielwin_CT database
-        init();
+        //init();
 
 		try{
 			Convert_table();
