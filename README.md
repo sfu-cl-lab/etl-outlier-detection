@@ -39,5 +39,6 @@ Output: A single data table where each row represents a target instance and each
       + Go into `src` folder 
       + `javac -cp ".:./lib/*" Convert_table.java `  
       + `java -cp ".:./lib/*" Convert_table > result.txt `  
+      
       Then you can check the converted table in your "dbname".
 
